@@ -68,15 +68,35 @@ public sealed class ScriptPluginCommand : SlashCommand
             return true;
         }
 
-        var args = ctx.Args.Length > 0 ? string.Join(" ", ctx.Args) : string.Empty;
-        var psi = BuildProcessInfo(_scriptPath, args);
+        // Fix B: Guard against path traversal — ensure the resolved script path stays within the plugin directory.
+        var resolvedScript = Path.GetFullPath(_scriptPath);
+        var resolvedDir = Path.GetFullPath(_pluginDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                          + Path.DirectorySeparatorChar;
+        if (!resolvedScript.StartsWith(resolvedDir, StringComparison.OrdinalIgnoreCase))
+        {
+            ctx.WriteMarkup($"[red]Plugin command '{_name}': script path escapes plugin directory.[/]");
+            return true;
+        }
+
+        // Fix A: Build PSI using ArgumentList to prevent command injection.
+        var psi = BuildProcessInfo(_scriptPath, ctx.Args);
         psi.RedirectStandardOutput = true;
         psi.RedirectStandardError  = true;
         psi.UseShellExecute = false;
         psi.CreateNoWindow  = true;
 
         using var process = new Process { StartInfo = psi };
-        process.Start();
+
+        // Fix C: Catch launch failures (missing interpreter, permission denied, etc.).
+        try
+        {
+            process.Start();
+        }
+        catch (Exception ex)
+        {
+            ctx.WriteMarkup($"[red]Plugin command '{_name}': failed to launch: {Markup.Escape(ex.Message)}[/]");
+            return true;
+        }
 
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
         timeout.CancelAfter(TimeoutMs);
@@ -105,15 +125,35 @@ public sealed class ScriptPluginCommand : SlashCommand
         return true;
     }
 
-    private static ProcessStartInfo BuildProcessInfo(string scriptPath, string args)
+    /// <summary>
+    /// Builds a <see cref="ProcessStartInfo"/> for the given script, adding interpreter flags
+    /// and user-supplied arguments via <see cref="ProcessStartInfo.ArgumentList"/> to prevent
+    /// shell command injection.
+    /// </summary>
+    private static ProcessStartInfo BuildProcessInfo(string scriptPath, IEnumerable<string> extraArgs)
     {
         var ext = Path.GetExtension(scriptPath).ToLowerInvariant();
-        return ext switch
+        ProcessStartInfo psi;
+        switch (ext)
         {
-            ".ps1" => new ProcessStartInfo("pwsh", $"-File \"{scriptPath}\" {args}"),
-            ".bat" => new ProcessStartInfo("cmd", $"/c \"{scriptPath}\" {args}"),
-            _      => new ProcessStartInfo("bash", $"\"{scriptPath}\" {args}"),
-        };
+            case ".ps1":
+                psi = new ProcessStartInfo("pwsh");
+                psi.ArgumentList.Add("-File");
+                psi.ArgumentList.Add(scriptPath);
+                break;
+            case ".bat" or ".cmd":
+                psi = new ProcessStartInfo("cmd");
+                psi.ArgumentList.Add("/c");
+                psi.ArgumentList.Add(scriptPath);
+                break;
+            default:
+                psi = new ProcessStartInfo("bash");
+                psi.ArgumentList.Add(scriptPath);
+                break;
+        }
+        foreach (var a in extraArgs)
+            psi.ArgumentList.Add(a);
+        return psi;
     }
 }
 
