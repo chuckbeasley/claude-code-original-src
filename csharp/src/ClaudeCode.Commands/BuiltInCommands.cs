@@ -374,8 +374,7 @@ public sealed class ConfigCommand : SlashCommand
         // /config features  — show all flags and their sources
         if (ctx.Args.Length > 0 && ctx.Args[0].Equals("features", StringComparison.OrdinalIgnoreCase))
         {
-            var configProv = ctx.ConfigProvider as ClaudeCode.Configuration.IConfigProvider;
-            var flags = ClaudeCode.Configuration.FeatureFlags.GetAll(configProv?.GlobalConfig);
+            var flags = ClaudeCode.Configuration.FeatureFlags.GetAll(null);
 
             var table = new Table().Border(TableBorder.Rounded).BorderColor(Color.Grey);
             table.AddColumn("Flag");
