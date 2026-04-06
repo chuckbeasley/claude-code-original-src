@@ -24,10 +24,24 @@ public sealed class VoiceInputService : IDisposable
     {
         if (_started) return;
 
-        _engine.Start(); // may throw VoiceUnavailableException — no subscriptions yet if it fails
-
+        // Subscribe before calling Start() so no recognition events are missed in the
+        // brief window between engine start and subscription. If Start() throws
+        // VoiceUnavailableException, the caller must Dispose() this service;
+        // Dispose() -> _engine.Dispose() tears down the engine and prevents callbacks.
         _engine.SpeechRecognized += OnSpeechRecognized;
         _engine.SpeechRejected   += OnSpeechRejected;
+
+        try
+        {
+            _engine.Start();
+        }
+        catch
+        {
+            // Roll back subscriptions so a failed Start leaves no dangling handlers.
+            _engine.SpeechRecognized -= OnSpeechRecognized;
+            _engine.SpeechRejected   -= OnSpeechRejected;
+            throw;
+        }
 
         _heartbeat = new Timer(
             _ => Console.Write("\r[voice: listening...]  "),
