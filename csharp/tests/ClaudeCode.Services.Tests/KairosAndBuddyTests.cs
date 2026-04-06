@@ -11,8 +11,8 @@ public sealed class KairosAndBuddyTests : IDisposable
         // Reset all static state.
         ReplModeFlags.KairosEnabled = false;
         ReplModeFlags.BuddyEnabled  = false;
-        FeatureFlags.Load(null);
         Environment.SetEnvironmentVariable("CLAUDE_FEATURE_KAIROS", null);
+        FeatureFlags.Load(null);
     }
 
     // ---- ReplModeFlags ----
