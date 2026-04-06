@@ -5677,3 +5677,77 @@ public sealed class AutofixPrCommand : SlashCommand
         string? DetailsUrl,
         string? Description);
 }
+
+// =============================================================================
+// KAIROS / Buddy mode commands
+// =============================================================================
+
+/// <summary>
+/// Toggles KAIROS assistant mode.
+/// Requires feature flag CLAUDE_FEATURE_KAIROS=1.
+/// </summary>
+public sealed class AssistantCommand : SlashCommand
+{
+    /// <inheritdoc/>
+    public override string Name        => "/assistant";
+
+    /// <inheritdoc/>
+    public override string Description => "Toggle KAIROS assistant mode (structured reasoning)";
+
+    /// <inheritdoc/>
+    public override Task<bool> ExecuteAsync(CommandContext ctx, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(ctx);
+
+        if (!ClaudeCode.Configuration.FeatureFlags.IsEnabled("kairos"))
+        {
+            ctx.WriteMarkup("[yellow]Assistant mode is disabled. Enable with: CLAUDE_FEATURE_KAIROS=1[/]");
+            return Task.FromResult(true);
+        }
+
+        ClaudeCode.Core.State.ReplModeFlags.KairosEnabled =
+            !ClaudeCode.Core.State.ReplModeFlags.KairosEnabled;
+
+        if (ClaudeCode.Core.State.ReplModeFlags.KairosEnabled)
+            ctx.WriteMarkup("[green]Assistant mode ON[/] [grey](KAIROS structured reasoning active)[/]");
+        else
+            ctx.WriteMarkup("[grey]Assistant mode OFF[/]");
+
+        return Task.FromResult(true);
+    }
+}
+
+/// <summary>
+/// Toggles Buddy mode (ambient context notes after each turn).
+/// Requires feature flag CLAUDE_FEATURE_KAIROS=1.
+/// </summary>
+public sealed class BuddyCommand : SlashCommand
+{
+    /// <inheritdoc/>
+    public override string Name        => "/buddy";
+
+    /// <inheritdoc/>
+    public override string Description => "Toggle Buddy mode (ambient context notes)";
+
+    /// <inheritdoc/>
+    public override Task<bool> ExecuteAsync(CommandContext ctx, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(ctx);
+
+        if (!ClaudeCode.Configuration.FeatureFlags.IsEnabled("kairos"))
+        {
+            ctx.WriteMarkup("[yellow]Buddy mode is disabled. Enable with: CLAUDE_FEATURE_KAIROS=1[/]");
+            return Task.FromResult(true);
+        }
+
+        ClaudeCode.Core.State.ReplModeFlags.BuddyEnabled =
+            !ClaudeCode.Core.State.ReplModeFlags.BuddyEnabled;
+
+        if (ClaudeCode.Core.State.ReplModeFlags.BuddyEnabled)
+            ctx.WriteMarkup("[green]Buddy mode ON[/] [grey](context notes after each turn)[/]");
+        else
+            ctx.WriteMarkup("[grey]Buddy mode OFF[/]");
+
+        return Task.FromResult(true);
+    }
+}

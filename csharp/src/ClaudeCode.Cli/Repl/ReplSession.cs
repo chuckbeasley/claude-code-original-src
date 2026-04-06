@@ -306,6 +306,14 @@ public sealed class ReplSession
                 if (pendingBtw is not null)
                     turnInput = turnInput + "\n\nBy the way: " + pendingBtw;
 
+                // KAIROS numbered-selection shortcut: if KAIROS mode is active and the entire
+                // input is a bare integer, prefix it with "Select option ".
+                if (ReplModeFlags.KairosEnabled
+                    && System.Text.RegularExpressions.Regex.IsMatch(turnInput.Trim(), @"^\d+$"))
+                {
+                    turnInput = $"Select option {turnInput.Trim()}";
+                }
+
                 // Expand @-mentions (file, git diff, etc.) before sending to the model.
                 var expandedInput = await MentionResolver.ExpandAsync(turnInput, _cwd, cts.Token).ConfigureAwait(false);
 
@@ -462,6 +470,8 @@ public sealed class ReplSession
         registry.Register(new OnboardingCommand());
         registry.Register(new RemoteSetupCommand());
         registry.Register(new AutofixPrCommand());
+        registry.Register(new AssistantCommand());
+        registry.Register(new BuddyCommand());
 
         return registry;
     }
@@ -733,8 +743,10 @@ public sealed class ReplSession
         // applied mid-session takes effect on the next prompt without rebuilding the engine.
         var promptColor = GetAnsiColorCode(ColorCommand.ActivePromptColor);
 
-        // Show [MIC] prefix when voice mode is active so the user knows the mic is listening.
-        var voicePrefix = ReplModeFlags.VoiceMode ? "[MIC] " : "";
+        // Show [MIC] prefix when voice mode is active, or [ASSISTANT] when KAIROS mode is active.
+        var voicePrefix = ReplModeFlags.VoiceMode    ? "[MIC] "
+                        : ReplModeFlags.KairosEnabled ? "[ASSISTANT] "
+                        : "";
 
         // Show buddy context note from previous turn (if ready).
         if (_buddyTask?.IsCompleted == true)
