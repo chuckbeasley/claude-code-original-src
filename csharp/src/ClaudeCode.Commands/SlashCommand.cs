@@ -253,7 +253,8 @@ public sealed class CommandRegistry
     {
         if (_commands.TryGetValue(name, out var cmd))
         {
-            _commands.Remove(name);
+            _commands.Remove(cmd.Name); // always remove primary name
+            _commands.Remove(name);     // remove the key passed in (no-op if same as primary)
             foreach (var alias in cmd.Aliases)
                 _commands.Remove(alias);
         }
