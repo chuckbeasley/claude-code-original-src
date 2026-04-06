@@ -93,6 +93,15 @@ public sealed class BuddyService
                         break;
                     }
 
+                    case "message_delta":
+                    {
+                        // Record output-token usage so /cost reflects full buddy call cost.
+                        var payload = TryDeserialize<MessageDeltaPayload>(sseEvent.Data);
+                        if (payload?.Usage is { } usage)
+                            _costTracker.AddUsage(BuddyModel, usage);
+                        break;
+                    }
+
                     case "content_block_delta":
                     {
                         var payload = TryDeserialize<ContentBlockDeltaPayload>(sseEvent.Data);
