@@ -34,14 +34,32 @@ public sealed class HelpCommand : SlashCommand
     {
         ArgumentNullException.ThrowIfNull(ctx);
 
+        var allCmds = _registry.GetAll().OrderBy(c => c.Name).ToList();
+        var pluginNames = ctx.PluginCommandNames ?? [];
+
+        var builtIn = allCmds.Where(c => !pluginNames.Contains(c.Name, StringComparer.OrdinalIgnoreCase)).ToList();
+        var plugin  = allCmds.Where(c => pluginNames.Contains(c.Name, StringComparer.OrdinalIgnoreCase)).ToList();
+
         var table = new Table().Border(TableBorder.Rounded).BorderColor(Color.Grey);
         table.AddColumn("Command");
         table.AddColumn("Description");
 
-        foreach (var cmd in _registry.GetAll().OrderBy(c => c.Name))
+        foreach (var cmd in builtIn)
             table.AddRow(cmd.Name.EscapeMarkup(), cmd.Description.EscapeMarkup());
 
         AnsiConsole.Write(table);
+
+        if (plugin.Count > 0)
+        {
+            AnsiConsole.MarkupLine("\n[grey]Plugin Commands[/]");
+            var pt = new Table().Border(TableBorder.Rounded).BorderColor(Color.Grey);
+            pt.AddColumn("Command");
+            pt.AddColumn("Description");
+            foreach (var cmd in plugin)
+                pt.AddRow(cmd.Name.EscapeMarkup(), cmd.Description.EscapeMarkup());
+            AnsiConsole.Write(pt);
+        }
+
         return Task.FromResult(true);
     }
 }
@@ -2365,16 +2383,19 @@ public sealed class ReloadPluginsCommand : SlashCommand
     {
         ArgumentNullException.ThrowIfNull(ctx);
 
-        ctx.WriteMarkup("[grey]Reloading plugins...[/]");
-
-        if (ctx.ReloadPlugins is not null)
+        if (ctx.ReloadPluginsAndCommands is { } reload)
         {
-            ctx.ReloadPlugins();
-            ctx.WriteMarkup("[green]Plugin reload complete.[/]");
+            reload();
+            ctx.WriteMarkup("[green]Plugins and plugin commands reloaded.[/]");
+        }
+        else if (ctx.ReloadPlugins is { } reloadTools)
+        {
+            reloadTools();
+            ctx.WriteMarkup("[green]Plugin tools reloaded.[/]");
         }
         else
         {
-            ctx.WriteMarkup("[yellow]Plugin infrastructure not available in this session.[/]");
+            ctx.WriteMarkup("[grey]Plugin reload not available in this context.[/]");
         }
 
         return Task.FromResult(true);
