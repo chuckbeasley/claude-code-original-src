@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\ClaudeCode.Services\ClaudeCode.Services.csproj" />
     <ProjectReference Include="..\..\src\ClaudeCode.Core\ClaudeCode.Core.csproj" />
+    <ProjectReference Include="..\..\src\ClaudeCode.Configuration\ClaudeCode.Configuration.csproj" />
     <ProjectReference Include="..\..\src\ClaudeCode.Commands\ClaudeCode.Commands.csproj" />
   </ItemGroup>
 
