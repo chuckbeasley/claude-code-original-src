@@ -1,0 +1,16 @@
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\bin\Release\net10.0\ClaudeCode.Permissions.deps.json
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\bin\Release\net10.0\ClaudeCode.Permissions.dll
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\bin\Release\net10.0\ClaudeCode.Permissions.pdb
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\bin\Release\net10.0\ClaudeCode.Core.dll
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\bin\Release\net10.0\ClaudeCode.Core.pdb
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\obj\Release\net10.0\ClaudeCode.Permissions.csproj.AssemblyReference.cache
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\obj\Release\net10.0\ClaudeCode.Permissions.GeneratedMSBuildEditorConfig.editorconfig
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\obj\Release\net10.0\ClaudeCode.Permissions.AssemblyInfoInputs.cache
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\obj\Release\net10.0\ClaudeCode.Permissions.AssemblyInfo.cs
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\obj\Release\net10.0\ClaudeCode.Permissions.csproj.CoreCompileInputs.cache
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\obj\Release\net10.0\ClaudeCode.Permissions.sourcelink.json
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\obj\Release\net10.0\ClaudeCo.E2701C9D.Up2Date
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\obj\Release\net10.0\ClaudeCode.Permissions.dll
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\obj\Release\net10.0\refint\ClaudeCode.Permissions.dll
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\obj\Release\net10.0\ClaudeCode.Permissions.pdb
+D:\projects\claude-code\csharp\src\ClaudeCode.Permissions\obj\Release\net10.0\ref\ClaudeCode.Permissions.dll

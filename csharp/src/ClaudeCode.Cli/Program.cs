@@ -113,6 +113,42 @@ services.AddSingleton<IAnthropicClient>(sp =>
     return ApiProviderFactory.CreateClient(httpClient, providerConfig);
 });
 
+// ── Extended services ──────────────────────────────────────────────────────
+// Services are registered unconditionally; each guards itself with FeatureFlags
+// so they are no-ops when the corresponding flag is off.
+
+services.AddSingleton<ClaudeCode.Services.AwaySummary.AwaySummaryService>();
+
+services.AddSingleton<ClaudeCode.Services.Notifications.NotificationService>(
+    _ => new ClaudeCode.Services.Notifications.NotificationService(null));
+
+services.AddSingleton<ClaudeCode.Services.Sleep.PreventSleepService>();
+
+services.AddSingleton<ClaudeCode.Services.PolicyLimits.PolicyLimitsService>();
+
+services.AddSingleton<ClaudeCode.Services.Diagnostics.IDiagnosticProvider>(
+    _ => ClaudeCode.Services.Diagnostics.NullDiagnosticProvider.Instance);
+services.AddSingleton<ClaudeCode.Services.Diagnostics.DiagnosticTrackingService>();
+
+services.AddSingleton<ClaudeCode.Services.SettingsSync.SettingsSyncService>();
+
+services.AddSingleton<ClaudeCode.Services.Lsp.LspDiagnosticRegistry>();
+services.AddSingleton<ClaudeCode.Services.Lsp.LspServerManager>();
+
+// TeamMemorySyncService has a manual constructor — wire via factory.
+services.AddSingleton<ClaudeCode.Services.TeamMemorySync.TeamMemorySyncService>(sp =>
+{
+    var providerConfig = sp.GetRequiredService<ApiProviderConfig>();
+    var httpFactory    = sp.GetRequiredService<IHttpClientFactory>();
+    var memDir = Path.Combine(
+        ClaudeCode.Configuration.ConfigPaths.ClaudeHomeDir, "memory", "team");
+    return new ClaudeCode.Services.TeamMemorySync.TeamMemorySyncService(
+        httpFactory.CreateClient(),
+        providerConfig.BaseUrl,
+        providerConfig.ApiKey,
+        memDir);
+});
+
 var registrar = new TypeRegistrar(services);
 var app = new CommandApp<ChatCommand>(registrar);
 

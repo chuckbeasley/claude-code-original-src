@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -l \"writeTextContent\\\\|writeFile\\\\|createFile\\\\|fs.write\" /d/projects/claude-code/src/tools/*/index.ts /d/projects/claude-code/src/tools/*/*.ts)",
+      "Bash(grep -E \"\\\\.ts$\")",
+      "Bash(ls:*)",
+      "Bash(mkdir -p D:/projects/claude-code/csharp)",
+      "Bash(dotnet new:*)",
+      "Bash(dotnet sln:*)",
+      "Bash(dotnet add:*)",
+      "Bash(find D:/projects/claude-code/csharp -name \"Class1.cs\" -delete)",
+      "Bash(find D:/projects/claude-code/csharp -name \"UnitTest1.cs\" -delete)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet run:*)",
+      "Bash(dotnet test:*)",
+      "Bash(python3:*)",
+      "Bash(printf \"/help\\\\n/exit\\\\n\")",
+      "Bash(printf \"/help\\\\n/version\\\\n/cost\\\\n/exit\\\\n\")",
+      "Bash(printf \"/compact\\\\n/exit\\\\n\")",
+      "Bash(printf \"/resume\\\\n/exit\\\\n\")",
+      "Bash(printf \"/exit\\\\n\")",
+      "Bash(grep -h \"export const.*TOOL_NAME\\\\|export const.*_PROMPT\" /d/projects/claude-code/src/tools/*/prompt.ts)",
+      "Bash(grep -v \"//\")",
+      "Bash(find src:*)",
+      "Bash(xargs grep:*)"
+    ]
+  }
+}

@@ -12,14 +12,85 @@ public static class FeatureFlags
     // Known flags with their hardcoded defaults.
     private static readonly Dictionary<string, bool> _defaults = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["cron"]           = false,
-        ["sleep"]          = false,
-        ["coordinator"]    = false,
-        ["agent-triggers"] = false,
-        ["voice"]          = false,
-        ["kairos"]         = false,
-        ["bridge"]         = false,
-        ["proactive"]      = false,
+        // Phase 1 — original 8 flags
+        ["cron"]             = false,
+        ["sleep"]            = false,
+        ["coordinator"]      = false,
+        ["agent-triggers"]   = false,
+        ["voice"]            = false,
+        ["kairos"]           = false,
+        ["bridge"]           = false,
+        ["proactive"]        = false,
+
+        // Remote / CCR
+        ["ccr-auto-connect"]   = false,
+        ["ccr-mirror"]         = false,
+        ["ccr-remote-setup"]   = false,
+        ["direct-connect"]     = false,
+        ["ssh-remote"]         = false,
+        ["upload-user-settings"]   = false,
+        ["download-user-settings"] = false,
+
+        // Session modes
+        ["bg-sessions"]     = false,
+        ["daemon"]          = false,
+        ["uds-inbox"]       = false,
+        ["coordinator-mode"] = false,
+        ["fork-subagent"]   = false,
+        ["byoc-environment-runner"] = false,
+        ["self-hosted-runner"]      = false,
+        ["templates"]       = false,
+        ["lodestone"]       = false,
+
+        // Context / compaction
+        ["context-collapse"]           = false,
+        ["reactive-compact"]           = false,
+        ["cached-microcompact"]        = false,
+        ["prompt-cache-break-detection"] = false,
+        ["history-snip"]               = false,
+        ["context-report"]             = false,
+
+        // UI / output
+        ["token-budget"]        = false,
+        ["streamlined-output"]  = false,
+        ["ultraplan"]           = false,
+        ["hook-prompts"]        = false,
+        ["new-init"]            = false,
+        ["break-cache-command"] = false,
+
+        // Memory / skills
+        ["away-summary"]                  = false,
+        ["extract-memories"]              = false,
+        ["teammem"]                       = false,
+        ["experimental-skill-search"]     = false,
+        ["mcp-rich-output"]               = false,
+        ["mcp-skills"]                    = false,
+        ["run-skill-generator"]           = false,
+        ["skill-improvement"]             = false,
+
+        // KAIROS extended
+        ["kairos-brief"]           = false,
+        ["kairos-channels"]        = false,
+        ["kairos-dream"]           = false,
+        ["kairos-github-webhooks"] = false,
+
+        // Agent / monitoring
+        ["monitor-tool"]          = false,
+        ["workflow-scripts"]      = false,
+        ["agent-memory-snapshot"] = false,
+        ["verification-agent"]    = false,
+        ["chicago-mcp"]           = false,
+
+        // Infrastructure / debug
+        ["file-persistence"]                    = false,
+        ["commit-attribution"]                  = false,
+        ["allow-test-versions"]                 = false,
+        ["hard-fail"]                           = false,
+        ["torch"]                               = false,
+        ["transcript-classifier"]               = false,
+        ["bash-classifier"]                     = false,
+        ["unattended-retry"]                    = false,
+        ["skip-detection-when-autoupdates-disabled"] = false,
     };
 
     // Effective flag table after merging all sources. Assigned atomically in Load().

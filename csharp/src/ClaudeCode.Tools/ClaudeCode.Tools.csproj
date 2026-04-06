@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClaudeCode.Core\ClaudeCode.Core.csproj" />
+    <ProjectReference Include="..\ClaudeCode.Mcp\ClaudeCode.Mcp.csproj" />
+    <ProjectReference Include="..\ClaudeCode.Permissions\ClaudeCode.Permissions.csproj" />
+    <ProjectReference Include="..\ClaudeCode.Services\ClaudeCode.Services.csproj" />
+    <ProjectReference Include="..\ClaudeCode.Configuration\ClaudeCode.Configuration.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DiffPlex" Version="1.9.0" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="10.0.0" />
+  </ItemGroup>
+
+</Project>

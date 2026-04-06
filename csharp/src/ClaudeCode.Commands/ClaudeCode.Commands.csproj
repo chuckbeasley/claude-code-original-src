@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="QRCoder" Version="1.6.0" />
+    <PackageReference Include="Spectre.Console" Version="0.50.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClaudeCode.Core\ClaudeCode.Core.csproj" />
+    <ProjectReference Include="..\ClaudeCode.Services\ClaudeCode.Services.csproj" />
+    <ProjectReference Include="..\ClaudeCode.Configuration\ClaudeCode.Configuration.csproj" />
+    <ProjectReference Include="..\ClaudeCode.Tools\ClaudeCode.Tools.csproj" />
+  </ItemGroup>
+
+</Project>

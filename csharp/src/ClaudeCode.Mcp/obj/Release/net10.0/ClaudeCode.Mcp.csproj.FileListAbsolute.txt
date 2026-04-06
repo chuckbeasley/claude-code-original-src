@@ -1,0 +1,16 @@
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\bin\Release\net10.0\ClaudeCode.Mcp.deps.json
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\bin\Release\net10.0\ClaudeCode.Mcp.dll
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\bin\Release\net10.0\ClaudeCode.Mcp.pdb
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\bin\Release\net10.0\ClaudeCode.Core.dll
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\bin\Release\net10.0\ClaudeCode.Core.pdb
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\obj\Release\net10.0\ClaudeCode.Mcp.csproj.AssemblyReference.cache
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\obj\Release\net10.0\ClaudeCode.Mcp.GeneratedMSBuildEditorConfig.editorconfig
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\obj\Release\net10.0\ClaudeCode.Mcp.AssemblyInfoInputs.cache
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\obj\Release\net10.0\ClaudeCode.Mcp.AssemblyInfo.cs
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\obj\Release\net10.0\ClaudeCode.Mcp.csproj.CoreCompileInputs.cache
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\obj\Release\net10.0\ClaudeCode.Mcp.sourcelink.json
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\obj\Release\net10.0\ClaudeCo.186E4AB1.Up2Date
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\obj\Release\net10.0\ClaudeCode.Mcp.dll
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\obj\Release\net10.0\refint\ClaudeCode.Mcp.dll
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\obj\Release\net10.0\ClaudeCode.Mcp.pdb
+D:\projects\claude-code\csharp\src\ClaudeCode.Mcp\obj\Release\net10.0\ref\ClaudeCode.Mcp.dll

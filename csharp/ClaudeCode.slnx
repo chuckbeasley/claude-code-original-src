@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ClaudeCode.Cli/ClaudeCode.Cli.csproj" />
+    <Project Path="src/ClaudeCode.Commands/ClaudeCode.Commands.csproj" />
+    <Project Path="src/ClaudeCode.Configuration/ClaudeCode.Configuration.csproj" />
+    <Project Path="src/ClaudeCode.Core/ClaudeCode.Core.csproj" />
+    <Project Path="src/ClaudeCode.Mcp/ClaudeCode.Mcp.csproj" />
+    <Project Path="src/ClaudeCode.Permissions/ClaudeCode.Permissions.csproj" />
+    <Project Path="src/ClaudeCode.Services/ClaudeCode.Services.csproj" />
+    <Project Path="src/ClaudeCode.Tools/ClaudeCode.Tools.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ClaudeCode.Core.Tests/ClaudeCode.Core.Tests.csproj" />
+    <Project Path="tests/ClaudeCode.Integration.Tests/ClaudeCode.Integration.Tests.csproj" />
+    <Project Path="tests/ClaudeCode.Services.Tests/ClaudeCode.Services.Tests.csproj" />
+    <Project Path="tests/ClaudeCode.Tools.Tests/ClaudeCode.Tools.Tests.csproj" />
+  </Folder>
+</Solution>
