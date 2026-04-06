@@ -92,8 +92,8 @@ public sealed class PluginCommandTests
     public void LoadCommands_EmptyDir_ReturnsEmpty()
     {
         var loader = new PluginLoader();
-        // temp dir has no plugin directories — should not throw
+        // temp dir has no .claude/plugins/ — should return empty and not throw
         var result = loader.LoadCommands(Path.GetTempPath()).ToList();
-        Assert.NotNull(result);
+        Assert.Empty(result);
     }
 }
