@@ -53,6 +53,8 @@ public sealed class ReplSession
     private string? _promptSuggestion;   // ghost-text hint for the next REPL input
     private ClaudeCode.Services.PromptSuggestion.PromptSuggestionService? _promptSuggestionSvc;
     private ClaudeCode.Services.Voice.VoiceInputService? _voiceInputService;
+    private ClaudeCode.Services.AutoDream.BuddyService? _buddySvc;
+    private Task<string?>? _buddyTask;
     private readonly HashSet<string> _pluginCommandNames = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
@@ -234,6 +236,9 @@ public sealed class ReplSession
         // Start the background AutoDream service — runs lightweight idle tasks every 5 minutes.
         _autoDream = new ClaudeCode.Services.AutoDream.AutoDreamService(cwd);
         _autoDream.Start();
+
+        // Initialise BuddyService — generates brief context notes after each assistant turn.
+        _buddySvc = new ClaudeCode.Services.AutoDream.BuddyService(_client, _costTracker);
 
         var inputHistory = new InputHistory();
         // Initialise prompt suggestion service when the feature is enabled.
@@ -583,6 +588,13 @@ public sealed class ReplSession
             // Fire-and-forget so the REPL prompt returns immediately while TTS plays.
             if (ReplModeFlags.VoiceMode && _lastAssistantResponse.Length > 0)
                 _ = VoiceCommand.SpeakAsync(_lastAssistantResponse, sessionToken);
+
+            // Fire buddy note generation for next-prompt display.
+            if (ClaudeCode.Core.State.ReplModeFlags.BuddyEnabled && _buddySvc is not null)
+            {
+                var buddyMsgs = _engine?.Messages ?? Array.Empty<MessageParam>();
+                _buddyTask = _buddySvc.GetContextNoteAsync(buddyMsgs, sessionToken);
+            }
         }
         catch (OperationCanceledException)
         {
@@ -723,6 +735,20 @@ public sealed class ReplSession
 
         // Show [MIC] prefix when voice mode is active so the user knows the mic is listening.
         var voicePrefix = ReplModeFlags.VoiceMode ? "[MIC] " : "";
+
+        // Show buddy context note from previous turn (if ready).
+        if (_buddyTask?.IsCompleted == true)
+        {
+            var note = _buddyTask.GetAwaiter().GetResult(); // safe: task is already completed
+            _buddyTask = null;
+            if (!string.IsNullOrWhiteSpace(note))
+                AnsiConsole.MarkupLine($"[grey]  ↳ Buddy: {note.EscapeMarkup()}[/]");
+        }
+        else if (_buddyTask != null)
+        {
+            // Task not ready in time — discard silently to avoid a display race.
+            _buddyTask = null;
+        }
 
         // Show any pending prompt suggestion as a dim hint above the prompt.
         var suggestion = _promptSuggestion;
