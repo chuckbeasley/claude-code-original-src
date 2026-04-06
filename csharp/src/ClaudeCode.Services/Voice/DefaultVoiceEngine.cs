@@ -91,23 +91,23 @@ public sealed class DefaultVoiceEngine : IVoiceEngine
         var ev = engineType.GetEvent(eventName);
         if (ev is null) return;
 
-        // Build a delegate of the event's handler type that bridges to our Action.
-        var fallback = new EventHandler<EventArgs>((s, e) => handler(s, e));
+        // Create a delegate of the exact event handler type that calls our Action.
+        // Uses CLR delegate contravariance: method(object?, EventArgs) satisfies
+        // EventHandler<DerivedEventArgs> because the method accepts the base type.
         try
         {
-            ev.AddEventHandler(engine, fallback);
+            var del = Delegate.CreateDelegate(
+                ev.EventHandlerType!,
+                handler.Target,
+                handler.Method,
+                throwOnBindFailure: false);
+
+            if (del is not null)
+                ev.AddEventHandler(engine, del);
+            else
+                // Very last resort: try adding as-is in case CLR allows the covariant bind
+                ev.AddEventHandler(engine, new EventHandler<EventArgs>((s, e) => handler(s, e)));
         }
-        catch
-        {
-            // If the event type doesn't accept EventHandler<EventArgs>, try Delegate.CreateDelegate.
-            try
-            {
-                var del = Delegate.CreateDelegate(ev.EventHandlerType!, handler.Target,
-                    handler.Method, throwOnBindFailure: false);
-                if (del is not null)
-                    ev.AddEventHandler(engine, del);
-            }
-            catch { /* best-effort */ }
-        }
+        catch { /* best-effort — event subscription is optional */ }
     }
 }

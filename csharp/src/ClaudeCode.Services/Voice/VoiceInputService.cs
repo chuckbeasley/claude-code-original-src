@@ -24,9 +24,10 @@ public sealed class VoiceInputService : IDisposable
     {
         if (_started) return;
 
+        _engine.Start(); // may throw VoiceUnavailableException — no subscriptions yet if it fails
+
         _engine.SpeechRecognized += OnSpeechRecognized;
         _engine.SpeechRejected   += OnSpeechRejected;
-        _engine.Start();
 
         _heartbeat = new Timer(
             _ => Console.Write("\r[voice: listening...]  "),
