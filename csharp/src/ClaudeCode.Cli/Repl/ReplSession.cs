@@ -52,6 +52,7 @@ public sealed class ReplSession
     private string? _pendingNextPrompt;  // set by /autofix-pr et al. via CommandContext.SetNextPrompt
     private string? _promptSuggestion;   // ghost-text hint for the next REPL input
     private ClaudeCode.Services.PromptSuggestion.PromptSuggestionService? _promptSuggestionSvc;
+    private ClaudeCode.Services.Voice.VoiceInputService? _voiceInputService;
     private readonly HashSet<string> _pluginCommandNames = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
@@ -312,6 +313,7 @@ public sealed class ReplSession
         finally
         {
             Console.CancelKeyPress -= outerCancelHandler;
+            _voiceInputService?.Dispose();
             _bridgeServer?.Dispose();
             if (_autoDream != null) await _autoDream.DisposeAsync().ConfigureAwait(false);
         }
@@ -526,6 +528,7 @@ public sealed class ReplSession
             SessionId        = _engine?.SessionId,
             Memory           = _sessionMemory,
             SetNextPrompt    = prompt => _pendingNextPrompt = prompt,
+            ToggleVoiceInput = enabled => ToggleVoiceInput(enabled),
         };
 
         await command.ExecuteAsync(ctx, ct).ConfigureAwait(false);
@@ -718,6 +721,9 @@ public sealed class ReplSession
         // applied mid-session takes effect on the next prompt without rebuilding the engine.
         var promptColor = GetAnsiColorCode(ColorCommand.ActivePromptColor);
 
+        // Show [MIC] prefix when voice mode is active so the user knows the mic is listening.
+        var voicePrefix = ReplModeFlags.VoiceMode ? "[MIC] " : "";
+
         // Show any pending prompt suggestion as a dim hint above the prompt.
         var suggestion = _promptSuggestion;
         _promptSuggestion = null;
@@ -736,11 +742,11 @@ public sealed class ReplSession
                 VimMode.Visual => "[V]",
                 _ => "[I]"
             };
-            Console.Write($"\n{promptColor}{initialTag}{promptColor}>\x1b[0m ");
+            Console.Write($"\n{promptColor}{initialTag}{promptColor}{voicePrefix}>\x1b[0m ");
         }
         else
         {
-            Console.Write($"\n{promptColor}>\x1b[0m ");
+            Console.Write($"\n{promptColor}{voicePrefix}>\x1b[0m ");
         }
 
         // Redraws the entire prompt line with the mode-appropriate indicator and
@@ -756,11 +762,11 @@ public sealed class ReplSession
                     VimMode.Visual => "[V]",
                     _ => "[I]"
                 };
-                p = $"\r\x1b[2K{promptColor}{modeTag}{promptColor}>\x1b[0m ";
+                p = $"\r\x1b[2K{promptColor}{modeTag}{promptColor}{voicePrefix}>\x1b[0m ";
             }
             else
             {
-                p = $"\r\x1b[2K{promptColor}>\x1b[0m ";
+                p = $"\r\x1b[2K{promptColor}{voicePrefix}>\x1b[0m ";
             }
             Console.Write(p);
             Console.Write(buffer.ToString());
@@ -863,7 +869,7 @@ public sealed class ReplSession
                             {
                                 Console.WriteLine();
                                 Console.WriteLine(string.Join("  ", matches));
-                                Console.Write($"\n{promptColor}[I]{promptColor}>\x1b[0m {buffer}");
+                                Console.Write($"\n{promptColor}[I]{promptColor}{voicePrefix}>\x1b[0m {buffer}");
                             }
                         }
                         else
@@ -915,7 +921,7 @@ public sealed class ReplSession
                             }
                         }
                         Console.WriteLine();
-                        Console.Write($"\n{promptColor}[I]{promptColor}>\x1b[0m {buffer}");
+                        Console.Write($"\n{promptColor}[I]{promptColor}{voicePrefix}>\x1b[0m {buffer}");
                         continue;
                     }
                 }
@@ -1061,7 +1067,7 @@ public sealed class ReplSession
                     {
                         Console.WriteLine();
                         Console.WriteLine(string.Join("  ", matches));
-                        Console.Write($"\n{promptColor}>\x1b[0m " + buffer);
+                        Console.Write($"\n{promptColor}{voicePrefix}>\x1b[0m " + buffer);
                     }
                 }
                 else
@@ -1108,7 +1114,7 @@ public sealed class ReplSession
                         ReplaceCurrentLineInput(buffer, ref cursorPos, match);
                 }
                 Console.WriteLine();
-                Console.Write($"\n{promptColor}>\x1b[0m " + buffer);
+                Console.Write($"\n{promptColor}{voicePrefix}>\x1b[0m " + buffer);
                 continue;
             }
 
@@ -1261,6 +1267,58 @@ public sealed class ReplSession
         // Spectre.Console does not have a built-in global theme switcher,
         // so we signal the change by marking it. Future rendering picks up the field.
         AnsiConsole.MarkupLine($"[grey]Theme set to '{theme.EscapeMarkup()}'.[/]");
+    }
+
+    /// <summary>
+    /// Starts or stops the voice input service in response to the <c>/voice</c> command.
+    /// Creates the <see cref="ClaudeCode.Services.Voice.VoiceInputService"/> on first use.
+    /// Reverts <see cref="ReplModeFlags.VoiceMode"/> when the engine cannot be initialised.
+    /// </summary>
+    /// <param name="enabled"><see langword="true"/> to start listening; <see langword="false"/> to stop.</param>
+    private void ToggleVoiceInput(bool enabled)
+    {
+        if (enabled)
+        {
+            if (_voiceInputService is null)
+            {
+                try
+                {
+                    var engine = new ClaudeCode.Services.Voice.DefaultVoiceEngine();
+                    _voiceInputService = new ClaudeCode.Services.Voice.VoiceInputService(engine);
+                    _voiceInputService.TextRecognized += OnVoiceTextRecognized;
+                }
+                catch (ClaudeCode.Services.Voice.VoiceUnavailableException ex)
+                {
+                    AnsiConsole.MarkupLine(
+                        $"[red]Voice input unavailable: {ex.Message.EscapeMarkup()}[/]");
+                    ClaudeCode.Core.State.ReplModeFlags.VoiceMode = false;
+                    return;
+                }
+            }
+
+            _voiceInputService.Start();
+            AnsiConsole.MarkupLine("[green]Voice input started.[/]");
+        }
+        else
+        {
+            _voiceInputService?.Stop();
+        }
+    }
+
+    /// <summary>
+    /// Handles a speech recognition result from <see cref="ClaudeCode.Services.Voice.VoiceInputService"/>.
+    /// Prints the recognized text and queues it as the next REPL prompt turn via
+    /// <see cref="_pendingNextPrompt"/>. Called on a background recognition thread — the
+    /// string reference write is atomic on all supported .NET platforms.
+    /// </summary>
+    /// <param name="text">The recognized utterance text. Never null or empty.</param>
+    private void OnVoiceTextRecognized(string text)
+    {
+        AnsiConsole.MarkupLine($"[grey]Recognized: \"{text.EscapeMarkup()}\"[/]");
+        // Queue as the next submitted prompt turn only when no higher-priority prompt is already
+        // pending (e.g. one injected by /autofix-pr). The REPL loop consumes _pendingNextPrompt
+        // after the user's next slash command.
+        _pendingNextPrompt ??= text;
     }
 
     /// <summary>

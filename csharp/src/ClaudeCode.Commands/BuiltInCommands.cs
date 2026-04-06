@@ -3034,10 +3034,20 @@ public sealed class VoiceCommand : SlashCommand
 
             // Speak a short confirmation so the user can verify TTS is working.
             await SpeakAsync("Voice mode enabled", ct).ConfigureAwait(false);
+
+            // STT: start voice input when voice feature flag is enabled.
+            if (ClaudeCode.Configuration.FeatureFlags.IsEnabled("voice"))
+                ctx.ToggleVoiceInput?.Invoke(true);
+            else
+                ctx.WriteMarkup("[grey]Voice input (STT) available with: CLAUDE_FEATURE_VOICE=1[/]");
         }
         else
         {
             ctx.WriteMarkup("[grey]Voice mode disabled.[/]");
+
+            // STT: stop voice input.
+            if (ClaudeCode.Configuration.FeatureFlags.IsEnabled("voice"))
+                ctx.ToggleVoiceInput?.Invoke(false);
         }
 
         return true;

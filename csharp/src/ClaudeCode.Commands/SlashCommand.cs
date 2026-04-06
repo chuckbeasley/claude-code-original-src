@@ -125,6 +125,13 @@ public sealed class CommandContext
     public Action? ReloadPluginsAndCommands { get; init; }
 
     /// <summary>
+    /// Starts or stops the speech-to-text input service.
+    /// Receives <see langword="true"/> to start listening, <see langword="false"/> to stop.
+    /// May be <see langword="null"/> when voice infrastructure is not wired.
+    /// </summary>
+    public Action<bool>? ToggleVoiceInput { get; init; }
+
+    /// <summary>
     /// The names of any plugin-contributed commands currently registered.
     /// Used by /help to show a "Plugin Commands" section.
     /// May be <see langword="null"/> when no plugin commands are registered.
