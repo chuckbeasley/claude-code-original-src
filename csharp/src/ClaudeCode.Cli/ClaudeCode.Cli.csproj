@@ -11,8 +11,8 @@
     <PackageReference Include="Markdig" Version="0.38.0" />
     <PackageReference Include="Spectre.Console" Version="0.50.0" />
     <PackageReference Include="Spectre.Console.Cli" Version="0.50.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0-rc.1.25453.5" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0-rc.1.25453.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0-rc.2.25502.107" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0-rc.2.25502.107" />
   </ItemGroup>
 
   <ItemGroup>
