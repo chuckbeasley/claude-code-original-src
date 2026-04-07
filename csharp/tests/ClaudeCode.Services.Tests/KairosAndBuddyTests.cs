@@ -1,8 +1,7 @@
 namespace ClaudeCode.Services.Tests;
 
-using ClaudeCode.Core.State;
 using ClaudeCode.Configuration;
-using ClaudeCode.Configuration.Settings;
+using ClaudeCode.Core.State;
 
 public sealed class KairosAndBuddyTests : IDisposable
 {
@@ -10,7 +9,7 @@ public sealed class KairosAndBuddyTests : IDisposable
     {
         // Reset all static state.
         ReplModeFlags.KairosEnabled = false;
-        ReplModeFlags.BuddyEnabled  = false;
+        ReplModeFlags.BuddyEnabled = false;
         Environment.SetEnvironmentVariable("CLAUDE_FEATURE_KAIROS", null);
         FeatureFlags.Load(null);
     }
@@ -43,7 +42,7 @@ public sealed class KairosAndBuddyTests : IDisposable
     // ---- Feature flag gate ----
 
     [Fact]
-    public void AssistantCommand_FlagOff_PrintsEnableInstruction()
+    public async Task AssistantCommand_FlagOff_PrintsEnableInstruction()
     {
         FeatureFlags.Load(null); // defaults — kairos = false
         var cmd = new ClaudeCode.Commands.AssistantCommand();
@@ -58,14 +57,14 @@ public sealed class KairosAndBuddyTests : IDisposable
             WriteMarkup = output.Add,
         };
 
-        cmd.ExecuteAsync(ctx).GetAwaiter().GetResult();
+        await cmd.ExecuteAsync(ctx);
 
         Assert.Contains(output, s => s.Contains("CLAUDE_FEATURE_KAIROS"));
         Assert.False(ReplModeFlags.KairosEnabled); // did not toggle
     }
 
     [Fact]
-    public void AssistantCommand_FlagOn_TogglesKairosEnabled()
+    public async Task AssistantCommand_FlagOn_TogglesKairosEnabled()
     {
         Environment.SetEnvironmentVariable("CLAUDE_FEATURE_KAIROS", "1");
         FeatureFlags.Load(null);
@@ -81,15 +80,15 @@ public sealed class KairosAndBuddyTests : IDisposable
             WriteMarkup = output.Add,
         };
 
-        cmd.ExecuteAsync(ctx).GetAwaiter().GetResult();
+        await cmd.ExecuteAsync(ctx);
         Assert.True(ReplModeFlags.KairosEnabled);
 
-        cmd.ExecuteAsync(ctx).GetAwaiter().GetResult();
+        await cmd.ExecuteAsync(ctx);
         Assert.False(ReplModeFlags.KairosEnabled);
     }
 
     [Fact]
-    public void BuddyCommand_FlagOff_PrintsEnableInstruction()
+    public async Task BuddyCommand_FlagOff_PrintsEnableInstruction()
     {
         FeatureFlags.Load(null);
         var cmd = new ClaudeCode.Commands.BuddyCommand();
@@ -104,14 +103,14 @@ public sealed class KairosAndBuddyTests : IDisposable
             WriteMarkup = output.Add,
         };
 
-        cmd.ExecuteAsync(ctx).GetAwaiter().GetResult();
+        await cmd.ExecuteAsync(ctx);
 
         Assert.Contains(output, s => s.Contains("CLAUDE_FEATURE_KAIROS"));
         Assert.False(ReplModeFlags.BuddyEnabled);
     }
 
     [Fact]
-    public void BuddyCommand_FlagOn_TogglesBuddyEnabled()
+    public async Task BuddyCommand_FlagOn_TogglesBuddyEnabled()
     {
         Environment.SetEnvironmentVariable("CLAUDE_FEATURE_KAIROS", "1");
         FeatureFlags.Load(null);
@@ -127,10 +126,10 @@ public sealed class KairosAndBuddyTests : IDisposable
             WriteMarkup = output.Add,
         };
 
-        cmd.ExecuteAsync(ctx).GetAwaiter().GetResult();
+        await cmd.ExecuteAsync(ctx);
         Assert.True(ReplModeFlags.BuddyEnabled);
 
-        cmd.ExecuteAsync(ctx).GetAwaiter().GetResult();
+        await cmd.ExecuteAsync(ctx);
         Assert.False(ReplModeFlags.BuddyEnabled);
     }
 }

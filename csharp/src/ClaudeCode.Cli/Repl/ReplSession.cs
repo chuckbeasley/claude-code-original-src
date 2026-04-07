@@ -265,9 +265,6 @@ public sealed class ReplSession
             _ = ClaudeCode.Services.Updates.UpdateChecker.CheckAndPrintAsync(
                 ClaudeCode.Cli.ClaudeCodeInfo.Version, cts.Token);
 
-            // Tracks how many AutoDream results have already been shown so we only print new ones.
-            var lastDreamTaskCount = 0;
-
             while (!cts.IsCancellationRequested)
             {
                 // Notify AutoDream that the user is active, resetting the idle countdown.

@@ -10,7 +10,7 @@ public sealed class InProcessTeammateTask : IAsyncDisposable
     private static readonly object _instanceLock = new();
 
     private readonly CancellationTokenSource _cts = new();
-    private Task? _runTask;
+    private Task? _runTask = Task.CompletedTask;
     private readonly Queue<string> _pendingMessages = new();
     private readonly SemaphoreSlim _messageSemaphore = new(0);
     private readonly object _queueLock = new();

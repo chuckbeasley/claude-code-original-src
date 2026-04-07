@@ -102,8 +102,6 @@ internal sealed class StreamingMarkdownRenderer
     private readonly StringBuilder _codeBuf = new();      // Code block body accumulator
     private string? _codeLang;                             // Language of current code fence
     private bool _inCodeFence;                             // Inside a ``` ... ``` block?
-    private bool _inBold;
-    private bool _inItalic;
 
     // -----------------------------------------------------------------------
     // Public API

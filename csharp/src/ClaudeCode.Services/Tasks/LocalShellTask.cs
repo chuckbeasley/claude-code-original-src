@@ -58,7 +58,7 @@ public sealed class LocalShellTask : IAsyncDisposable
         var outputTask = Task.Run(async () =>
         {
             var sb = new System.Text.StringBuilder();
-            while (!_process.StandardOutput.EndOfStream)
+            while (true)
             {
                 var line = await _process.StandardOutput.ReadLineAsync().ConfigureAwait(false);
                 if (line is null) break;
@@ -70,7 +70,7 @@ public sealed class LocalShellTask : IAsyncDisposable
         // Stream stderr to TaskStore concurrently.
         var errorTask = Task.Run(async () =>
         {
-            while (!_process.StandardError.EndOfStream)
+            while (true)
             {
                 var line = await _process.StandardError.ReadLineAsync().ConfigureAwait(false);
                 if (line is null) break;

@@ -1,9 +1,8 @@
 namespace ClaudeCode.Tools.TaskOutput;
 
+using ClaudeCode.Core.Tools;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using ClaudeCode.Core.Tools;
-using ClaudeCode.Tools.TaskStore;
 
 // ---------------------------------------------------------------------------
 // Input / Output records
@@ -105,15 +104,15 @@ public sealed class TaskOutputTool : Tool<TaskOutputInput, TaskOutputOutput>
     /// <inheritdoc/>
     public override string? GetActivityDescription(JsonElement? input = null)
     {
-        if (input is null) return null;
-
-        if (input.Value.TryGetProperty("task_id", out var id) &&
-            id.ValueKind == JsonValueKind.String)
+        if (input is null)
         {
-            return $"Reading output of task {id.GetString()}";
+            return null;
         }
 
-        return "Reading task output";
+        return input.Value.TryGetProperty("task_id", out var id) &&
+            id.ValueKind == JsonValueKind.String
+            ? $"Reading output of task {id.GetString()}"
+            : "Reading task output";
     }
 
     // -----------------------------------------------------------------------
@@ -145,12 +144,13 @@ public sealed class TaskOutputTool : Tool<TaskOutputInput, TaskOutputOutput>
         ArgumentNullException.ThrowIfNull(input);
 
         if (string.IsNullOrWhiteSpace(input.TaskId))
+        {
             return Task.FromResult(ValidationResult.Failure("task_id must not be empty or whitespace."));
+        }
 
-        if (input.Timeout <= 0)
-            return Task.FromResult(ValidationResult.Failure("timeout must be a positive value in milliseconds."));
-
-        return Task.FromResult(ValidationResult.Success);
+        return input.Timeout <= 0
+            ? Task.FromResult(ValidationResult.Failure("timeout must be a positive value in milliseconds."))
+            : Task.FromResult(ValidationResult.Success);
     }
 
     // -----------------------------------------------------------------------
@@ -170,17 +170,21 @@ public sealed class TaskOutputTool : Tool<TaskOutputInput, TaskOutputOutput>
 
         // Check if the task exists at all.
         if (!TaskStoreState.Tasks.TryGetValue(taskId, out var task))
+        {
             return new ToolResult<TaskOutputOutput>
             {
                 Data = new TaskOutputOutput(taskId, $"Task '{taskId}' not found."),
             };
+        }
 
         // Output already available — return immediately.
         if (TaskStoreState.TaskOutputs.TryGetValue(taskId, out var output))
+        {
             return new ToolResult<TaskOutputOutput>
             {
                 Data = new TaskOutputOutput(taskId, output),
             };
+        }
 
         // If blocking, poll until output appears, task reaches a terminal state, or timeout.
         if (input.Block)
@@ -192,14 +196,18 @@ public sealed class TaskOutputTool : Tool<TaskOutputInput, TaskOutputOutput>
                 ct.ThrowIfCancellationRequested();
 
                 if (TaskStoreState.TaskOutputs.TryGetValue(taskId, out output))
+                {
                     return new ToolResult<TaskOutputOutput>
                     {
                         Data = new TaskOutputOutput(taskId, output),
                     };
+                }
 
                 // No output will arrive for a terminal task — stop waiting.
-                if (task.Status is "completed" or "deleted")
+                if (task?.Status is "completed" or "deleted")
+                {
                     break;
+                }
 
                 await Task.Delay(250, ct).ConfigureAwait(false);
 

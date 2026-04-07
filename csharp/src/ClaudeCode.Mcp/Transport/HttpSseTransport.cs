@@ -1,11 +1,11 @@
 namespace ClaudeCode.Mcp.Transport;
 
+using ClaudeCode.Mcp.JsonRpc;
 using System.Collections.Concurrent;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using ClaudeCode.Mcp.JsonRpc;
 
 /// <summary>
 /// MCP transport that uses HTTP+SSE (Server-Sent Events) protocol.
@@ -35,11 +35,17 @@ public sealed class HttpSseTransport : IMcpTransport
         _http.Timeout = TimeSpan.FromMinutes(10);
 
         if (apiKey is not null)
+        {
             _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+        }
 
         if (headers is not null)
+        {
             foreach (var (k, v) in headers)
+            {
                 _http.DefaultRequestHeaders.TryAddWithoutValidation(k, v);
+            }
+        }
 
         // Normalize URL — remove trailing slash
         _url = url.TrimEnd('/');
@@ -60,7 +66,9 @@ public sealed class HttpSseTransport : IMcpTransport
 
         // Extract session ID from response headers or query param
         if (response.Headers.TryGetValues("mcp-session-id", out var ids))
+        {
             _sessionId = ids.FirstOrDefault();
+        }
 
         var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
         _sseReader = Task.Run(() => ReadSseStreamAsync(stream, _cts.Token), CancellationToken.None);
@@ -91,7 +99,9 @@ public sealed class HttpSseTransport : IMcpTransport
             using var cts2 = CancellationTokenSource.CreateLinkedTokenSource(ct);
             cts2.CancelAfter(TimeSpan.FromSeconds(30));
             using (cts2.Token.Register(() => tcs.TrySetCanceled()))
+            {
                 return await tcs.Task.ConfigureAwait(false);
+            }
         }
         finally
         {
@@ -119,10 +129,13 @@ public sealed class HttpSseTransport : IMcpTransport
 
         try
         {
-            while (!ct.IsCancellationRequested && !reader.EndOfStream)
+            while (!ct.IsCancellationRequested)
             {
                 var line = await reader.ReadLineAsync(ct).ConfigureAwait(false);
-                if (line is null) break;
+                if (line is null)
+                {
+                    break;
+                }
 
                 if (line.StartsWith("event:", StringComparison.Ordinal))
                 {
@@ -139,7 +152,9 @@ public sealed class HttpSseTransport : IMcpTransport
                     dataLines.Clear();
 
                     if (eventType == "message" || eventType is null)
+                    {
                         DispatchMessage(data);
+                    }
 
                     eventType = null;
                 }
@@ -154,7 +169,10 @@ public sealed class HttpSseTransport : IMcpTransport
         {
             // Cancel all pending requests
             foreach (var tcs in _pending.Values)
+            {
                 tcs.TrySetException(new InvalidOperationException("SSE connection closed."));
+            }
+
             _pending.Clear();
         }
     }
@@ -182,7 +200,9 @@ public sealed class HttpSseTransport : IMcpTransport
                 };
 
                 if (_pending.TryGetValue(id, out var tcs))
+                {
                     tcs.TrySetResult(response);
+                }
             }
         }
         catch (Exception ex)
@@ -193,11 +213,18 @@ public sealed class HttpSseTransport : IMcpTransport
 
     public async ValueTask DisposeAsync()
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
+
         _disposed = true;
         await _cts.CancelAsync().ConfigureAwait(false);
         if (_sseReader is not null)
+        {
             await _sseReader.ConfigureAwait(false);
+        }
+
         _cts.Dispose();
         _http.Dispose();
     }
